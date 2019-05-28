@@ -29,6 +29,22 @@ module.exports = {
     return userHash;
   },
 
+  getFileHashes: function (path) {
+    let hashes = [];
+    hashes.push(this.getFileHash(path));
+    let pathParts = path.split('/');
+    let fileName = pathParts[pathParts.length - 1];
+
+    fileName = fileName.replace(/[.]txt/, '');
+    fileName = fileName.split(' ');
+
+    hashes.push(this.getFileNameHash(fileName[0], fileName[1]));
+    hashes.push(this.getFileNameHash(fileName[0], null));
+    hashes.push(this.getFileNameHash(null, fileName[1]));
+
+    return hashes;
+  },
+
   // Получаем хеш файла по его содержимому
   getFileHash: function (path) {
     let fileData = fs.readFileSync(path);
@@ -57,7 +73,6 @@ module.exports = {
     let hash = crypto.createHash('md5').update(strToHash).digest("hex");
     return hash;
   },
-
 
 
   // Получаем расстояние между двумя хешпми в виде числового буфера

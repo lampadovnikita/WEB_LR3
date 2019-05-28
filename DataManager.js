@@ -74,21 +74,12 @@ module.exports = {
     });
   },
 
-  writeFileInfo: function (fileName) {
+  writeFileInfo: function (fileName, hashes) {
     verifyDir(DATA_PATH);
     verifyDir(FILE_STORAGE_INFO_PATH);
 
-    let fileHash = hashManager.getFileHash(FILE_STORAGE_PATH + '/' + fileName);
-
-    fileName = fileName.replace(/[.]txt/, '');
-    fileName = fileName.split(' ');
-
-    let fileNameHash = hashManager.getFileNameHash(fileName[0], fileName[1]);
-    let firstNameHash = hashManager.getFileNameHash(fileName[0], null);
-    let lastNameHash = hashManager.getFileNameHash(null, fileName[1]);
-
     fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName[0] + ' ' + fileName[1] + '.txt',
-      fileHash + '\n' + fileNameHash + '\n' + firstNameHash + '\n' + lastNameHash);
+      hashes[0] + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
   },
 
   // Обновляем информацию о хранилище файлов
@@ -128,15 +119,12 @@ module.exports = {
       }
     }*/
 
-    let filesToRecord = [];
+    let filesToRecord = new Map();
 
     // Определяем и сохраняем информацию о новых файлах, которые необходимо сохранить
     for (let i = 0; i < storedFiles.length; i++) {
       if (k = recordedFiles.indexOf(storedFiles[i]) === -1) {
-        filesToRecord.push(storedFiles[i]);
-
-        /// !!! ПОТОМ ПЕРЕНЕСТИ В ГЛАВНУЮ ФУНКЦИЮ
-        this.writeFileInfo(storedFiles[i]);
+        filesToRecord.set(storedFiles[i], hashManager.getFileHashes(FILE_STORAGE_PATH + '/' + storedFiles[i]));
       }
     }
 

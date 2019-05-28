@@ -13,7 +13,7 @@ const MSG_REQUEST_FILE_LINK_HOLDING_CODE = 8;  // Код запроса на х�
 const MSG_RESPONSE_FILE_LINK_HOLDING_CODE = 9; // Код подтверждеия об успешном хранении файла
 
 module.exports = {
-  MSG_REQUEST_ONLINE_CODE:  MSG_REQUEST_ONLINE_CODE,
+  MSG_REQUEST_ONLINE_CODE: MSG_REQUEST_ONLINE_CODE,
   MSG_RESPONSE_ONLINE_CODE: MSG_RESPONSE_ONLINE_CODE,
   MSG_REQUEST_FILE_LINK_HOLDING_CODE: MSG_REQUEST_FILE_LINK_HOLDING_CODE,
   MSG_RESPONSE_FILE_LINK_HOLDING_CODE: MSG_RESPONSE_FILE_LINK_HOLDING_CODE,
@@ -69,7 +69,7 @@ module.exports = {
   },
 
   // Формируем сообщение для запроса на хранение ссылки на файл
-  buildSaveFileLinkRequest: function(requesterID, fileID, destinationID) {
+  buildSaveFileLinkRequest: function (requesterID, hashes, destinationID) {
     let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
 
     // Указываем тип сообщения
@@ -79,8 +79,10 @@ module.exports = {
     requesterID = hashManager.strToNumber(requesterID);
     message.fill(requesterID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
-    fileID = hashManager.strToNumber(fileID);
-    message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+    for (let i = 0; i < 4; i++) {
+      let hash = hashManager.strToNumber(hashes[i]);
+      message.fill(hash, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+    }
 
     destinationID = hashManager.strToNumber(destinationID);
     message.fill(destinationID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
@@ -90,7 +92,7 @@ module.exports = {
   },
 
   // Формируем сообщение для подтверждения хранения ссылки на файл
-  buildSaveFileLinkResponse: function(responserID, fileID, destinationID) {
+  buildSaveFileLinkResponse: function (responserID, fileID, destinationID) {
     let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
 
     // Указываем тип сообщения
@@ -125,7 +127,7 @@ module.exports = {
     messageData['Type'] = message[0];
 
     // Если пришёл ответ об активности
-    if (messageData['Type'] === MSG_RESPONSE_ONLINE_CODE){
+    if (messageData['Type'] === MSG_RESPONSE_ONLINE_CODE) {
 
       let userNameLength;
       // Распаковываем размер сообщения
@@ -135,7 +137,7 @@ module.exports = {
 
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
-      messageData['SenderName']= message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE);
+      messageData['SenderName'] = message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE);
     }
     // Если пришёл запрос на хранение ссылки на файл
     else if (messageData['Type'] === MSG_REQUEST_FILE_LINK_HOLDING_CODE) {

@@ -170,14 +170,14 @@ dgramSocket.bind(PORT, function () {
 function loopFunction() {
 
   // Если нужно передать ссылку на новые файлы
-  /*if (filesToSend !== undefined) {
+  if (filesToSend !== undefined) {
 
     for (let [key, value] of filesToSend) {
       // Расстояние между хешами
       let distance;
       // Минимальное расстояние между хешами
       let minDistance = hashManager.strToNumber('ffffffffffffffffffffffffffffffff');
-      // Индккс элемента с минимальным расстоянием
+      // Индекс элемента с минимальным расстоянием
       let minIndex = -1;
 
       for (let i = 0; i < onlineUsers.users.length; i++) {
@@ -186,7 +186,7 @@ function loopFunction() {
           continue;
         }
 
-        distance = hashManager.getDistance(value, onlineUsers.users[i]['ID']);
+        distance = hashManager.getDistance(value[0], onlineUsers.users[i]['ID']);
 
         // Сравнение буферов с хешами
         let compareRes = Buffer.compare(minDistance, distance);
@@ -206,7 +206,7 @@ function loopFunction() {
         dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
       }
     }
-  }*/
+  }
 
   // Выводим информацию об online пользователях, которую сформировали с предыдущей рассылки
   console.log("Current Online:");
