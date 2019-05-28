@@ -70,7 +70,7 @@ module.exports = {
 
   // Формируем сообщение для запроса на хранение ссылки на файл
   buildSaveFileLinkRequest: function (requesterID, hashes, destinationID) {
-    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
 
     // Указываем тип сообщения
     message[0] = MSG_REQUEST_FILE_LINK_HOLDING_CODE;
