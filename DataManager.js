@@ -78,24 +78,24 @@ module.exports = {
     verifyDir(DATA_PATH);
     verifyDir(FILE_STORAGE_INFO_PATH);
 
-    let fileHash = hashManager.getFileHash(fileName);
-    let fileNameHash;
-    let firstNameHash;
-    let lastNameHash;
+    let fileHash = hashManager.getFileHash(FILE_STORAGE_PATH + '/' + fileName);
 
-    fs.appendFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName, fileHash + '\n');
+    fileName = fileName.replace(/[.]txt/, '');
+    fileName = fileName.split(' ');
+
+    let fileNameHash = hashManager.getFileNameHash(fileName[0], fileName[1]);
+    let firstNameHash = hashManager.getFileNameHash(fileName[0], null);
+    let lastNameHash = hashManager.getFileNameHash(null, fileName[1]);
+
+    fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName[0] + ' ' + fileName[1] + '.txt',
+      fileHash + '\n' + fileNameHash + '\n' + firstNameHash + '\n' + lastNameHash);
   },
 
   // Обновляем информацию о хранилище файлов
   refreshFileStorageData: function () {
-    if (!verifyDir(DATA_PATH)) {
-      verifyDir(FILE_STORAGE_PATH);
-    }
-
-    // Создаём папку с информацией о хранящихся файлах, если её не существует
-    if (!fs.existsSync(FILE_STORAGE_INFO_PATH)) {
-      fs.closeSync(fs.openSync(FILE_STORAGE_INFO_PATH, 'w'));
-    }
+    verifyDir(DATA_PATH);
+    verifyDir(FILE_STORAGE_PATH);
+    verifyDir(FILE_STORAGE_INFO_PATH);
 
     // Информация о реально хранящихся файлах в папке-хранилище
     let storedFiles = fs.readdirSync(FILE_STORAGE_PATH);
@@ -123,7 +123,7 @@ module.exports = {
     for (let i = 0; i < storedFiles.length; i++) {
       if (path.extname(storedFiles[i]) === '.txt') {
         if (!recordedFilesMap.has(storedFiles[i])) {
-          filesToRecord.set(storedFiles[i], hashManager.getFileHash(storedFiles[i]));
+          filesToRecord.set(storedFiles[i], hashManager.getFileNameHash(storedFiles[i]));
         }
       }
     }*/
@@ -167,7 +167,7 @@ function recordFileInfo(fileName) {
   // Разделяем имя файла на имя и фамилию
   fileName = fileName.split(' ');
 
-  let fileHash = hashManager.getFileHash(fileName[0] + ' ' + fileName[1]);
+  let fileHash = hashManager.getFileNameHash(fileName[0] + ' ' + fileName[1]);
 
 
 }*/

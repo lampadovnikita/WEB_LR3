@@ -1,5 +1,6 @@
 // Файл, содержащий скрипты для получения и обработки хешей
 
+const fs = require('fs');
 const crypto = require('crypto');
 
 const netIntefaceHandler = require('./NetworkInterfaceHandler');
@@ -28,15 +29,36 @@ module.exports = {
     return userHash;
   },
 
-  // Получаем хеш файла по его имени
-  getFileHash: function (fileName) {
-    fileName = fileName.replace(/[.]txt/, '');
+  // Получаем хеш файла по его содержимому
+  getFileHash: function (path) {
+    let fileData = fs.readFileSync(path);
 
-    fileName = fileName.toLowerCase();
-    let fileHash = crypto.createHash('md5').update(fileName).digest("hex");
-
-    return fileHash;
+    let hash = crypto.createHash('md5').update(fileData).digest("hex");
+    return hash
   },
+
+  // Получаем хеш файла по его полному имени, если заданы оба аргумента
+  // Получаем хеш по имени в назвнии файла, если задан только первый аргумент
+  // Получаем хеш по фамилии в назвнии файла, если задан только второй аргумент
+  getFileNameHash: function (firstName, lastName) {
+    let strToHash = '';
+
+    if (firstName !== null && firstName !== undefined) {
+      strToHash += firstName;
+    }
+    if (lastName !== null && lastName !== undefined) {
+      if (strToHash.length !== 0) {
+        strToHash += ' ';
+      }
+      strToHash += lastName;
+    }
+    strToHash = strToHash.toLowerCase();
+
+    let hash = crypto.createHash('md5').update(strToHash).digest("hex");
+    return hash;
+  },
+
+
 
   // Получаем расстояние между двумя хешпми в виде числового буфера
   getDistance: function (firstHash, secondHash) {
