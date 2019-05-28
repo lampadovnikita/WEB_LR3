@@ -76,7 +76,7 @@ module.exports = {
     verifyDir(DATA_PATH);
     verifyDir(FILE_STORAGE_INFO_PATH);
 
-    fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName[0] + ' ' + fileName[1] + '.txt',
+    fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName,
       hashes[0] + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
   },
 
