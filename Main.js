@@ -112,7 +112,7 @@ dgramSocket.on('message', function (message, rinfo) {
     // Сохраняем информацию о записанном файле
     // Удаляем файл, ссылку которого сохранили, из структуры
     for (let [key, value] of filesToSend) {
-      if (value === messageData['FileID']) {
+      if (value[0] === messageData['FileID']) {
         dataManager.writeFileInfo(key, value);
         filesToSend.delete(key);
         break;
