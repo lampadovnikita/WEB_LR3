@@ -82,8 +82,14 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('Destination ID: ' + messageData['DestinationID']);
       console.log('File ID: ' + messageData['FileID']);
 
+      let hashes = [];
+      hashes.push(messageData['FileID']);
+      hashes.push(messageData['FileNameID']);
+      hashes.push(messageData['FirstNameID']);
+      hashes.push(messageData['LastNameID']);
+
       // Записываем ссылку на файл
-      dataManager.writeFileLink(messageData['FileID'], messageData['SenderID']);
+      dataManager.writeFileLink(hashes, messageData['SenderID']);
 
       console.log('Link saved');
       console.log('-------------------------------------------------------------');

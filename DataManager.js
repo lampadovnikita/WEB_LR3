@@ -15,7 +15,7 @@ const FILE_STORAGE_PATH = './data/fileStorage';
 const USER_INFO_PATH = './data/userInfo.txt';
 
 // Путь к файлу, в котором хранится информация о том, где следует искать какой-либо файл
-const FILE_LINKS_PATH = './data/fileLinks.txt';
+const FILE_LINKS_PATH = './data/fileLinks';
 
 // Папка, в которой хранятся файлы с информацией о хеше каждого файла
 const FILE_STORAGE_INFO_PATH = './data/fileStorageInfo';
@@ -64,14 +64,12 @@ module.exports = {
   },
 
   // Записываем ссылку на для указанного ID файла
-  writeFileLink: function (fileID, link) {
+  writeFileLink: function (hashes, link) {
     verifyDir(DATA_PATH);
+    verifyDir(FILE_LINKS_PATH);
 
-    fs.appendFile(FILE_LINKS_PATH, fileID + ' ' + link + '\n', {}, function (err) {
-      if (err) {
-        throw err;
-      }
-    });
+    fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + hashes[0] + '.txt',
+      link + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
   },
 
   writeFileInfo: function (fileName, hashes) {

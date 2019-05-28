@@ -157,11 +157,11 @@ module.exports = {
       messageData['FirstNameID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 2,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 3);
 
-      messageData['LastNameID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE * 3,
+      messageData['LastNameID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE * 3,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4);
 
-      messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+      messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
     }
     // Если пришло подтверждение хранения ссылки на файл
     else if (messageData['Type'] === MSG_RESPONSE_FILE_LINK_HOLDING_CODE) {
