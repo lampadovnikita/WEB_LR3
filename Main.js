@@ -10,7 +10,7 @@ const PORT = 41234;
 const BROADCAST_ADDRESS = netInterfaceHandler.getBroadcastAddress();
 
 const CONNECTION_TIME = 3000; // Время подключения(первого сбора информации), мс
-const CHECK_INTERVAL = 10000; // Интервал повторений опроса, мс
+const CHECK_INTERVAL = 15000; // Интервал повторений опроса, мс
 
 // Для считывания текста с консоли
 const rl = readline.createInterface({
@@ -119,6 +119,10 @@ dgramSocket.on('message', function (message, rinfo) {
       }
     }
   }
+  // Если пришёл запрос на получение информации о файле
+  else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_INFO_CODE) {
+    console.log('ypa');
+  }
 });
 
 // Когда сокет создан
@@ -171,6 +175,11 @@ dgramSocket.bind(PORT, function () {
     console.log('Connecting...');
   }
 });
+
+function sendFileInfoRequest(infoHash) {
+  let requestMessage = messageHandler.buildRequestFileInfo(currentUserID, infoHash);
+  dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
+}
 
 // Функция, которая выполняется каждые CHECK_INTERVAL мс
 function loopFunction() {

@@ -74,10 +74,10 @@ module.exports = {
 
   writeFileInfo: function (fileName, hashes) {
     verifyDir(DATA_PATH);
-    verifyDir(FILE_STORAGE_INFO_PATH);
-
     fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName,
-      hashes[0] + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
+    hashes[0] + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
+
+    verifyDir(FILE_STORAGE_INFO_PATH);
   },
 
   // Обновляем информацию о хранилище файлов
