@@ -18,11 +18,16 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+let requestedInfoText = "";
 
 // Массив с информацией о всех online пользователях
 // Каждый элемент представлен следующей структурой: ID, Name
 // Как в этом языке делать массив структуры??????????????????????????
-let onlineUsers = {
+let prevOnlineUsers = {
+  users: []
+};
+
+let currentOnlineUsers = {
   users: []
 };
 
@@ -62,7 +67,7 @@ dgramSocket.on('message', function (message, rinfo) {
   // Если пришёл ответ об активности
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_ONLINE_CODE) {
     // Добавляем информацию о пользователе в массив
-    onlineUsers.users.push({
+    currentOnlineUsers.users.push({
       ID: messageData['SenderID'],
       Name: messageData['SenderName'],
     });
@@ -177,12 +182,22 @@ dgramSocket.bind(PORT, function () {
 });
 
 function sendFileInfoRequest(infoHash) {
+  console.log("iiii");
   let requestMessage = messageHandler.buildRequestFileInfo(currentUserID, infoHash);
   dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
 }
 
 // Функция, которая выполняется каждые CHECK_INTERVAL мс
 function loopFunction() {
+
+  prevOnlineUsers.users = [];
+
+  console.log("Current Online:");
+  while (currentOnlineUsers.users.length) {
+    console.log(currentOnlineUsers.users[currentOnlineUsers.users.length - 1]);
+    // Попутно очищаем массив для дальнейшего заполнения новой информацией
+    prevOnlineUsers.users.push(currentOnlineUsers.users.pop());
+  }
 
   // Если нужно передать ссылку на новые файлы
   if (filesToSend !== undefined) {
@@ -195,13 +210,13 @@ function loopFunction() {
       // Индекс элемента с минимальным расстоянием
       let minIndex = -1;
 
-      for (let i = 0; i < onlineUsers.users.length; i++) {
+      for (let i = 0; i < prevOnlineUsers.users.length; i++) {
         // Не учитываем самого себя
-        if (onlineUsers.users[i]['ID'] === currentUserID) {
+        if (prevOnlineUsers.users[i]['ID'] === currentUserID) {
           continue;
         }
 
-        distance = hashManager.getDistance(value[0], onlineUsers.users[i]['ID']);
+        distance = hashManager.getDistance(value[0], prevOnlineUsers.users[i]['ID']);
 
         // Сравнение буферов с хешами
         let compareRes = Buffer.compare(minDistance, distance);
@@ -216,19 +231,23 @@ function loopFunction() {
       if (minIndex !== -1) {
         // Формируем сообщение для запроса на хранение ссылки на файл
         let requestMessage = messageHandler.buildSaveFileLinkRequest(currentUserID, value,
-          onlineUsers.users[minIndex]['ID']);
+          prevOnlineUsers.users[minIndex]['ID']);
 
         dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
       }
     }
   }
 
-  // Выводим информацию об online пользователях, которую сформировали с предыдущей рассылки
-  console.log("Current Online:");
-  while (onlineUsers.users.length) {
-    // Попутно очищаем массив для дальнейшего заполнения новой информацией
-    console.log(onlineUsers.users.pop());
-  }
+  // // Выводим информацию об online пользователях, которую сформировали с предыдущей рассылки
+  // console.log("Current Online:");
+  // // while (prevOnlineUsers.users.length) {
+  // //   // Попутно очищаем массив для дальнейшего заполнения новой информацией
+  // //   console.log(prevOnlineUsers.users.pop());
+  // // }
+  //
+  // prevOnlineUsers.users.forEach(function (user) {
+  //   console.log(user);
+  // });
 
   // Проверяем online, отсылая всем запросы
   checkOnline();
