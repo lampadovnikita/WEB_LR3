@@ -87,7 +87,7 @@ module.exports = {
 
     if (!fs.existsSync(SEARCH_INFO_PATH)) {
       fs.close(fs.openSync(SEARCH_INFO_PATH));
-      return;
+      return undefined;
     }
 
     // Структура с данными пользователя
