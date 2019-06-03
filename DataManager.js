@@ -42,7 +42,7 @@ module.exports = {
     };
 
     let data = fs.readFileSync(USER_INFO_PATH, 'utf-8');
-    data = data.split('\n');
+    data = data.split('\r\n');
     userInfo['ID'] = data[0];
     userInfo['Name'] = data[1];
 
@@ -58,7 +58,7 @@ module.exports = {
   writeUserInfo: function (userID, userName) {
     verifyDir(DATA_PATH);
 
-    fs.writeFile(USER_INFO_PATH, userID + '\n' + userName, (err) => {
+    fs.writeFile(USER_INFO_PATH, userID + '\r\n' + userName, (err) => {
       if (err) {
         throw err;
       }
@@ -71,13 +71,13 @@ module.exports = {
     verifyDir(FILE_LINKS_PATH);
 
     fs.writeFileSync(FILE_LINKS_PATH + '/' + hashes[0] + '.txt',
-      link + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
+      link + '\n\n' + hashes[1] + '\n\n' + hashes[2] + '\n\n' + hashes[3]);
   },
 
   writeFileInfo: function (fileName, hashes) {
     verifyDir(DATA_PATH);
     fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName,
-    hashes[0] + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
+    hashes[0] + '\n\n' + hashes[1] + '\n\n' + hashes[2] + '\n\n' + hashes[3]);
 
     verifyDir(FILE_STORAGE_INFO_PATH);
   },
@@ -148,7 +148,7 @@ module.exports = {
     for (let i = 0; i < storedFilesInfo.length; i++) {
       let fileHashes = fs.readFileSync(FILE_STORAGE_INFO_PATH + '/' + storedFilesInfo[i]);
       fileHashes = fileHashes.toString();
-      fileHashes = fileHashes.split('\n');
+      fileHashes = fileHashes.split('\r\n');
 
       for (let j = 0; j < fileHashes.length; j++) {
         if (fileHashes[j] === hash) {
