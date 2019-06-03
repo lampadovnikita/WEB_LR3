@@ -82,8 +82,13 @@ module.exports = {
     verifyDir(FILE_STORAGE_INFO_PATH);
   },
 
-  renameSearchInfo: function () {
+  readSearchInfo: function () {
     verifyDir(DATA_PATH);
+
+    if (!fs.existsSync(SEARCH_INFO_PATH)) {
+      fs.close(fs.openSync(SEARCH_INFO_PATH));
+      return;
+    }
 
     // Структура с данными пользователя
     let searchInfo = {

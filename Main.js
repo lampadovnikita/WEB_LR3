@@ -150,7 +150,7 @@ dgramSocket.bind(PORT, function () {
   let userInfo = dataManager.readUserInfo();
 
   // Считываем информацию, которую необходимо запросить
-  searchInfo = dataManager.renameSearchInfo();
+  searchInfo = dataManager.readSearchInfo();
 
   // Если данные ещё не записаны
   if (userInfo === undefined) {
