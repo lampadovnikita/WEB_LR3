@@ -142,9 +142,7 @@ module.exports = {
     verifyDir(DATA_PATH);
     verifyDir(FILE_STORAGE_INFO_PATH);
 
-    let resultFileName = undefined;
     let storedFilesInfo = fs.readdirSync(FILE_STORAGE_INFO_PATH);
-
     for (let i = 0; i < storedFilesInfo.length; i++) {
       let fileHashes = fs.readFileSync(FILE_STORAGE_INFO_PATH + '/' + storedFilesInfo[i]);
       fileHashes = fileHashes.toString();
@@ -160,8 +158,27 @@ module.exports = {
     return undefined;
   },
 
-  searchLinks: function (hash) {
+  searchLink: function (hash) {
+    verifyDir(DATA_PATH);
+    verifyDir(FILE_LINKS_PATH);
 
+    let storedFilesLinks = fs.readdirSync(FILE_LINKS_PATH);
+    for (let i = 0; i < storedFilesLinks.length; i++) {
+      let fileHashes = fs.readFileSync(FILE_LINKS_PATH + '/' + storedFilesLinks[i]);
+      fileHashes = fileHashes.toString();
+      fileHashes = fileHashes.split('\r\n');
+
+      let handlerID = fileHashes.shift();
+      fileHashes.push(storedFilesLinks[i].replace(/[.]txt/, ''));
+
+      for (let j = 0; j < fileHashes.length; j++) {
+        if (fileHashes[j] === hash) {
+          return handlerID;
+        }
+      }
+    }
+
+    return undefined;
   },
 
   // Обновляем информацию о хранилище файлов

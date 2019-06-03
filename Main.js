@@ -18,8 +18,6 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-let requestedInfoText = "";
-
 // Массив с информацией о всех online пользователях
 // Каждый элемент представлен следующей структурой: ID, Name
 // Как в этом языке делать массив структуры??????????????????????????
@@ -140,13 +138,21 @@ dgramSocket.on('message', function (message, rinfo) {
 
     let searchResult = dataManager.searchFile(messageData['InfoHash']);
     if (searchResult !== undefined) {
-      console.log('-------------------------------------------------------------');
       console.log('File was found in storage');
       console.log('File ID: ' + searchResult);
       console.log('-------------------------------------------------------------');
     }
     else {
-      //searchResult = dataManager.
+      searchResult = dataManager.searchLink(messageData['InfoHash']);
+      if (searchResult !== undefined) {
+        console.log('File link was found in storage');
+        console.log('Handler ID: ' + searchResult);
+        console.log('-------------------------------------------------------------');
+      }
+      else {
+        console.log('Information wasn\'t found in storage');
+        console.log('-------------------------------------------------------------');
+      }
     }
   }
 });
