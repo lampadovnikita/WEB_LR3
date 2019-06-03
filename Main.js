@@ -129,11 +129,25 @@ dgramSocket.on('message', function (message, rinfo) {
   }
   // Если пришёл запрос на получение информации о файле
   else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_INFO_CODE) {
+    if (messageData['SenderID'] === currentUserID) {
+      return;
+    }
     console.log('-------------------------------------------------------------');
     console.log('Request for information about file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('Info: ' + messageData['InfoHash']);
     console.log('-------------------------------------------------------------');
+
+    let searchResult = dataManager.searchFile(messageData['InfoHash']);
+    if (searchResult !== undefined) {
+      console.log('-------------------------------------------------------------');
+      console.log('File was found in storage');
+      console.log('File ID: ' + searchResult);
+      console.log('-------------------------------------------------------------');
+    }
+    else {
+      //searchResult = dataManager.
+    }
   }
 });
 

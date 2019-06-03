@@ -138,6 +138,32 @@ module.exports = {
     return searchInfo;
   },
 
+  searchFile: function (hash) {
+    verifyDir(DATA_PATH);
+    verifyDir(FILE_STORAGE_INFO_PATH);
+
+    let resultFileName = undefined;
+    let storedFilesInfo = fs.readdirSync(FILE_STORAGE_INFO_PATH);
+
+    for (let i = 0; i < storedFilesInfo.length; i++) {
+      let fileHashes = fs.readFileSync(FILE_STORAGE_INFO_PATH + '/' + storedFilesInfo[i]);
+      fileHashes = fileHashes.toString();
+      fileHashes = fileHashes.split('\n');
+
+      for (let j = 0; j < fileHashes.length; j++) {
+        if (fileHashes[j] === hash) {
+          return fileHashes[j];
+        }
+      }
+    }
+
+    return undefined;
+  },
+
+  searchLinks: function (hash) {
+
+  },
+
   // Обновляем информацию о хранилище файлов
   refreshFileStorageData: function () {
     verifyDir(DATA_PATH);
@@ -150,30 +176,6 @@ module.exports = {
     // Информация о файлах, которые уже записаны
     //let recordedFiles = fs.readFileSync(FILE_STORAGE_INFO_PATH);
     let recordedFiles = fs.readdirSync(FILE_STORAGE_INFO_PATH);
-
-    /*if (recordedFiles.length !== 0) {
-      // Удаляем последний символ, т.к. это начало пустой строки
-      recordedFiles = recordedFiles.toString().substring(0, recordedFiles.length - 1);
-      // Разбиваем на отдельные строки
-      recordedFiles = recordedFiles.toString().split('\n');
-    }*/
-
-    //let recordedFilesMap = new Map();
-    //let filesToRecord = new Map();
-
-    /*// Переводим информацию о уже записанных файлах в структуру Map: FileName -> FileID
-    for (let i = 0; i < recordedFiles.length; i++) {
-      recordedFilesMap.set(recordedFiles[i].substring(33, recordedFiles[i].length), recordedFiles[i].substring(0, 32));
-    }*/
-
-    /*// Определяем и сохраняем информацию о нофых файлах, которые необходимо сохранить
-    for (let i = 0; i < storedFiles.length; i++) {
-      if (path.extname(storedFiles[i]) === '.txt') {
-        if (!recordedFilesMap.has(storedFiles[i])) {
-          filesToRecord.set(storedFiles[i], hashManager.getFileNameHash(storedFiles[i]));
-        }
-      }
-    }*/
 
     let filesToRecord = new Map();
 
@@ -204,14 +206,3 @@ function verifyDir(path) {
     return true;
   }
 }
-
-/*
-// Функция для создания файла с хеш-информацией о файле по заданному имени
-function recordFileInfo(fileName) {
-  // Разделяем имя файла на имя и фамилию
-  fileName = fileName.split(' ');
-
-  let fileHash = hashManager.getFileNameHash(fileName[0] + ' ' + fileName[1]);
-
-
-}*/
