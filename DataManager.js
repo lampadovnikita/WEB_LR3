@@ -86,7 +86,14 @@ module.exports = {
     verifyDir(DATA_PATH);
 
     if (!fs.existsSync(SEARCH_INFO_PATH)) {
-      fs.close(fs.openSync(SEARCH_INFO_PATH));
+      fs.open(SEARCH_INFO_PATH, 'w', function (err, fd) {
+        if (err) throw err;
+
+        fs.close(fd, function (err) {
+          if (err) throw err;
+        });
+      });
+
       return undefined;
     }
 
