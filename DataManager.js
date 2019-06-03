@@ -20,6 +20,8 @@ const FILE_LINKS_PATH = './data/fileLinks';
 // Папка, в которой хранятся файлы с информацией о хеше каждого файла
 const FILE_STORAGE_INFO_PATH = './data/fileStorageInfo';
 
+const SEARCH_INFO_PATH = './data/searchInfo.txt';
+
 module.exports = {
 
   // Считываем данные текущего пользователя из файла
@@ -78,6 +80,50 @@ module.exports = {
     hashes[0] + '\n' + hashes[1] + '\n' + hashes[2] + '\n' + hashes[3]);
 
     verifyDir(FILE_STORAGE_INFO_PATH);
+  },
+
+  renameSearchInfo: function () {
+    verifyDir(DATA_PATH);
+
+    // Структура с данными пользователя
+    let searchInfo = {
+      InfoType: undefined,
+      FileHash: undefined,
+      FileName: undefined,
+      FilePath: undefined
+    };
+
+    let searchStr = fs.readFileSync(SEARCH_INFO_PATH);
+    searchStr = searchStr.toString();
+    if (searchStr.length === 0) {
+      return undefined;
+    }
+
+    searchStr = searchStr.split(' ');
+
+    searchInfo['InfoType'] = searchStr[0];
+    if (searchInfo['InfoType'] === 'Hash') {
+      searchInfo['FileHash'] = searchStr[1];
+    }
+    else if (searchInfo['InfoType'] === 'Name') {
+      searchInfo['FileName'] = searchStr[1];
+      if (searchStr.length > 2) {
+        searchInfo['FileName'] += ' ' + searchStr[2];
+      }
+    }
+    else if (searchInfo['InfoType'] === 'Content') {
+      searchInfo['FilePath'] = FILE_STORAGE_PATH;
+      searchInfo['FilePath'] += '/' + searchStr[1];
+      if (searchStr.length > 2) {
+        searchInfo['FilePath'] += ' ' + searchStr[2];
+      }
+      searchInfo['FilePath'] += '.txt';
+    }
+    else {
+      searchInfo = undefined;
+    }
+
+    return searchInfo;
   },
 
   // Обновляем информацию о хранилище файлов

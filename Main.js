@@ -37,6 +37,9 @@ let currentUserID;
 // Файлы, хеш которых нужно отослать
 let filesToSend = undefined;
 
+// Информация, котрую запрашиваем у остальных пользователей
+let searchInfo = undefined;
+
 // Флаг, показывающий, что пользователь подключен (информация об online пользователях собирается первый раз)
 let isConnected = false;
 
@@ -111,7 +114,7 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('-------------------------------------------------------------');
     console.log('Validate of saving file link');
     console.log('Sender ID: ' + messageData['SenderID']);
-    console.log('file ID: ' + messageData['FileID']);
+    console.log('File ID: ' + messageData['FileID']);
     console.log('-------------------------------------------------------------');
 
     // Сохраняем информацию о записанном файле
@@ -126,7 +129,11 @@ dgramSocket.on('message', function (message, rinfo) {
   }
   // Если пришёл запрос на получение информации о файле
   else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_INFO_CODE) {
-    console.log('ypa');
+    console.log('-------------------------------------------------------------');
+    console.log('Request for information about file');
+    console.log('Sender ID: ' + messageData['SenderID']);
+    console.log('Info: ' + messageData['InfoHash']);
+    console.log('-------------------------------------------------------------');
   }
 });
 
@@ -141,6 +148,9 @@ dgramSocket.bind(PORT, function () {
 
   // Считываем данные о текущем пользователе
   let userInfo = dataManager.readUserInfo();
+
+  // Считываем информацию, которую необходимо запросить
+  searchInfo = dataManager.renameSearchInfo();
 
   // Если данные ещё не записаны
   if (userInfo === undefined) {
@@ -236,6 +246,26 @@ function loopFunction() {
         dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
       }
     }
+  }
+
+  if (searchInfo !== undefined) {
+    let searchHash;
+
+    if (searchInfo['InfoType'] === 'Hash') {
+      searchHash = searchInfo['FileHash'];
+    }
+    else if (searchInfo['InfoType'] === 'Name') {
+      searchHash = hashManager.getFileNameHash(searchInfo['FileName']);
+    }
+    else if (searchInfo['InfoType'] === 'Content') {
+      searchHash = hashManager.getFileHash(searchInfo['FileName']);
+    }
+    else {
+      return;
+    }
+
+    let requestMessage = messageHandler.buildRequestFileInfo(currentUserID, searchHash);
+    dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
   }
 
   // // Выводим информацию об online пользователях, которую сформировали с предыдущей рассылки

@@ -1,4 +1,4 @@
-// Файл, содержащий функции для раюоты c информацией о сетевом подключении
+// Файл, содержащий функции для работы c информацией о сетевом подключении
 
 const os = require('os');
 
@@ -32,12 +32,12 @@ module.exports = {
   getBroadcastAddress: function () {
     let ipAddress = this.getInterfaceElement('address');
     if (ipAddress === undefined) {
-      throw new Error('Unable to find IP address')
+      throw new Error('Unable to find IP address');
     }
 
     let netMask = this.getInterfaceElement('netmask');
     if (ipAddress === undefined) {
-      throw new Error('Unable to find netmask')
+      throw new Error('Unable to find netmask');
     }
 
     ipAddress = this.ipToNum(ipAddress);

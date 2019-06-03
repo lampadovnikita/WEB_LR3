@@ -143,6 +143,7 @@ module.exports = {
       FirstNameID: undefined,
       LastNameID: undefined,
       DestinationID: undefined,
+      InfoHash: undefined
     };
 
     // Определяем тип
@@ -200,6 +201,12 @@ module.exports = {
 
       messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
+    }
+    // Если пришёл запрос на информацию о файле
+    else if (messageData['Type'] === MSG_REQUEST_FILE_INFO_CODE) {
+      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
     }
 
     return messageData;
