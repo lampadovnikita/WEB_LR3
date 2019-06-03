@@ -71,13 +71,13 @@ module.exports = {
     verifyDir(FILE_LINKS_PATH);
 
     fs.writeFileSync(FILE_LINKS_PATH + '/' + hashes[0] + '.txt',
-      link + '\n\n' + hashes[1] + '\n\n' + hashes[2] + '\n\n' + hashes[3]);
+      link + '\r\n' + hashes[1] + '\r\n' + hashes[2] + '\r\n' + hashes[3]);
   },
 
   writeFileInfo: function (fileName, hashes) {
     verifyDir(DATA_PATH);
     fs.writeFileSync(FILE_STORAGE_INFO_PATH + '/' + fileName,
-    hashes[0] + '\n\n' + hashes[1] + '\n\n' + hashes[2] + '\n\n' + hashes[3]);
+    hashes[0] + '\r\n' + hashes[1] + '\r\n' + hashes[2] + '\r\n' + hashes[3]);
 
     verifyDir(FILE_STORAGE_INFO_PATH);
   },
