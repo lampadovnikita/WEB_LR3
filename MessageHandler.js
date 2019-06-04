@@ -159,7 +159,7 @@ module.exports = {
 
   buildFileInfoResponse: function (responserID, fileID, infoLength, name) {
     //[7, IDanswerer, IDdata, info_lengthUINT16, name_lengthUINT16, name]
-    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE + name.length);
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE + name.length);
     //let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE + name.length);
 
     // Указываем тип сообщения
