@@ -62,7 +62,7 @@ dgramSocket.on('message', function (message, rinfo) {
   // Если пришёл запрос на проверку активности
   if (messageData['Type'] === messageHandler.MSG_REQUEST_ONLINE_CODE) {
     // Формируем и отправляем ответ
-    let responseMessage = messageHandler.buildResponseIsOnline(currentUserID, currentUserName);
+    let responseMessage = messageHandler.buildIsOnlineResponse(currentUserID, currentUserName);
     dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
   }
   // Если пришёл ответ об активности
@@ -139,11 +139,14 @@ dgramSocket.on('message', function (message, rinfo) {
     let searchResult = dataManager.searchFile(messageData['InfoHash']);
     if (searchResult !== undefined) {
       console.log('File was found in storage');
-      console.log('File ID: ' + searchResult);
+      console.log('File ID: ' + searchResult['FileHash']);
+      console.log('File Name: ' + searchResult['FileName']);
+      console.log('File size: ' + searchResult['FileSize']);
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
-      //let responseMessage = messageHandler.buildResponseFileInfo(currentUserID, messageData['InfoHash'], searchResult);
+      let responseMessage = messageHandler.buildFileInfoResponse(currentUserID, searchResult, )
+      let n;
       //dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       return;
     }
@@ -155,7 +158,7 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
-      let responseMessage = messageHandler.buildResponseFileLink(currentUserID, messageData['InfoHash'], searchResult);
+      let responseMessage = messageHandler.buildFileLinkResponse(currentUserID, messageData['InfoHash'], searchResult);
       dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       return;
     }
@@ -230,7 +233,7 @@ dgramSocket.bind(PORT, function () {
 
 function sendFileInfoRequest(infoHash) {
   console.log("iiii");
-  let requestMessage = messageHandler.buildRequestFileInfo(currentUserID, infoHash);
+  let requestMessage = messageHandler.buildFileInfoRequest(currentUserID, infoHash);
   dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
 }
 
@@ -298,7 +301,7 @@ function loopFunction() {
       return;
     }
 
-    let requestMessage = messageHandler.buildRequestFileInfo(currentUserID, searchHash);
+    let requestMessage = messageHandler.buildFileInfoRequest(currentUserID, searchHash);
     dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
   }
 
@@ -314,7 +317,7 @@ function loopFunction() {
 
 // Функция, в которой выполняется широковещательная рассылка
 function checkOnline() {
-  let requestMessage = messageHandler.buildRequestIsOnline(currentUserID, currentUserName);
+  let requestMessage = messageHandler.buildIsOnlineRequest(currentUserID, currentUserName);
 
   // Отсылаем запрос
   dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);

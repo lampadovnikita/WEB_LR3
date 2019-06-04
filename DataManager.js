@@ -82,6 +82,7 @@ module.exports = {
     verifyDir(FILE_STORAGE_INFO_PATH);
   },
 
+  // Считываем информацию о том, что нужно искать у других пользователей
   readSearchInfo: function () {
     verifyDir(DATA_PATH);
 
@@ -97,11 +98,12 @@ module.exports = {
       return undefined;
     }
 
-    // Структура с данными пользователя
+    // Структура с данными о искомом файле
     let searchInfo = {
       InfoType: undefined,
       FileHash: undefined,
       FileName: undefined,
+      FileLength: undefined,
     };
 
     let searchStr = fs.readFileSync(SEARCH_INFO_PATH);
@@ -129,9 +131,16 @@ module.exports = {
     return searchInfo;
   },
 
+  // Поиск файла в каталоге по хешу
   searchFile: function (hash) {
     verifyDir(DATA_PATH);
     verifyDir(FILE_STORAGE_INFO_PATH);
+
+    let fileInfo = {
+      FileHash: undefined,
+      FileName: undefined,
+      FileSize: undefined,
+    };
 
     let storedFilesInfo = fs.readdirSync(FILE_STORAGE_INFO_PATH);
     for (let i = 0; i < storedFilesInfo.length; i++) {
@@ -141,7 +150,10 @@ module.exports = {
 
       for (let j = 0; j < fileHashes.length; j++) {
         if (fileHashes[j] === hash) {
-          return fileHashes[j];
+          fileInfo['FileHash'] = hash;
+          fileInfo['FileName'] = storedFilesInfo[i];
+          fileInfo['FileSize'] = fs.statSync(storedFilesInfo[i]);
+          return fileInfo;
         }
       }
     }
@@ -149,6 +161,7 @@ module.exports = {
     return undefined;
   },
 
+  // Поиск хранителя файла по хешу
   searchLink: function (hash) {
     verifyDir(DATA_PATH);
     verifyDir(FILE_LINKS_PATH);
