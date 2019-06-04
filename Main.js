@@ -145,31 +145,32 @@ dgramSocket.on('message', function (message, rinfo) {
 
       //let responseMessage = messageHandler.buildResponseFileInfo(currentUserID, messageData['InfoHash'], searchResult);
       //dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
+      return;
     }
-    else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_INFO_CODE) {
-      searchResult = dataManager.searchLink(messageData['InfoHash']);
-      if (searchResult !== undefined) {
-        console.log('File link was found in storage');
-        console.log('Handler ID: ' + searchResult);
-        console.log('Send response');
-        console.log('-------------------------------------------------------------');
 
-        let responseMessage = messageHandler.buildResponseFileLink(currentUserID, messageData['InfoHash'], searchResult);
-        dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
-      }
-      else {
-        console.log('Information wasn\'t found in storage');
-        console.log('-------------------------------------------------------------');
-      }
-    }
-    else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_CODE) {
+    searchResult = dataManager.searchLink(messageData['InfoHash']);
+    if (searchResult !== undefined) {
+      console.log('File link was found in storage');
+      console.log('Handler ID: ' + searchResult);
+      console.log('Send response');
       console.log('-------------------------------------------------------------');
-      console.log('Get file holder info');
-      console.log('Sender ID: ' + messageData['SenderID']);
-      console.log('File ID: ' + messageData['InfoHash']);
-      console.log('File holder: ' + messageData['HolderID']);
+
+      let responseMessage = messageHandler.buildResponseFileLink(currentUserID, messageData['InfoHash'], searchResult);
+      dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
+      return;
+    }
+    else {
+      console.log('Information wasn\'t found in storage');
       console.log('-------------------------------------------------------------');
     }
+  }
+  else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_CODE) {
+    console.log('-------------------------------------------------------------');
+    console.log('Get file holder info');
+    console.log('Sender ID: ' + messageData['SenderID']);
+    console.log('File ID: ' + messageData['InfoHash']);
+    console.log('File holder: ' + messageData['HolderID']);
+    console.log('-------------------------------------------------------------');
   }
 });
 
@@ -195,22 +196,22 @@ dgramSocket.bind(PORT, function () {
     currentUserID = hashManager.getUserHash();
 
     // Запрашиваем ввод имени
-      rl.question('Enter your name: ', (name) => {
-        // После того, как ввели имя
-        currentUserName = name;
-        rl.close();
+    rl.question('Enter your name: ', (name) => {
+      // После того, как ввели имя
+      currentUserName = name;
+      rl.close();
 
-        // Записываем данные о пользователе в файл
-        dataManager.writeUserInfo(currentUserID, currentUserName);
+      // Записываем данные о пользователе в файл
+      dataManager.writeUserInfo(currentUserID, currentUserName);
 
-        // Вызываем функцию для проверки онлайна
-        checkOnline();
-        // Первый раз запускаем главную функцию чере CONNECTION_TIME мс
-        setTimeout(loopFunction, CONNECTION_TIME);
+      // Вызываем функцию для проверки онлайна
+      checkOnline();
+      // Первый раз запускаем главную функцию чере CONNECTION_TIME мс
+      setTimeout(loopFunction, CONNECTION_TIME);
 
-        console.log('Connecting...');
+      console.log('Connecting...');
 
-      });
+    });
   }
   // Если данные о пользователе считаны из файла
   else {
@@ -300,17 +301,6 @@ function loopFunction() {
     let requestMessage = messageHandler.buildRequestFileInfo(currentUserID, searchHash);
     dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
   }
-
-  // // Выводим информацию об online пользователях, которую сформировали с предыдущей рассылки
-  // console.log("Current Online:");
-  // // while (prevOnlineUsers.users.length) {
-  // //   // Попутно очищаем массив для дальнейшего заполнения новой информацией
-  // //   console.log(prevOnlineUsers.users.pop());
-  // // }
-  //
-  // prevOnlineUsers.users.forEach(function (user) {
-  //   console.log(user);
-  // });
 
   // Проверяем online, отсылая всем запросы
   checkOnline();
