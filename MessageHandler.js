@@ -136,7 +136,7 @@ module.exports = {
   },
 
   // Формируем сообщение для подтверждения хранения ссылки на файл
-  buildSaveFileLinkResponse: function (responserID, fileID, destinationID) {
+  buildSaveFileLinkResponse: function (responserID, fileID, destinationID, address, port) {
     let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
 
     // Указываем тип сообщения
@@ -152,6 +152,17 @@ module.exports = {
     destinationID = hashManager.strToNumber(destinationID);
     message.fill(destinationID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
       MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+
+    address = netInterfaceHandler.ipToNum(address);
+
+    message.fill(address, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
+
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE +
+    MSG_PORT_SIZE - 1] = port;
+    port = port >> 8;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE +
+    MSG_PORT_SIZE - 2] = port;
 
     return message;
   },
@@ -298,7 +309,6 @@ module.exports = {
       messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
 
-      //let address = Buffer.allocUnsafe(MSG_IPV4_SIZE);
       let address = message.slice(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
       address = netInterfaceHandler.ipToStr(address);
@@ -325,8 +335,6 @@ module.exports = {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
       messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
-
-
     }
     // Если пришёл ответ на информацию о файле
     else if (messageData['Type'] === MSG_RESPONSE_FILE_INFO_CODE) {
