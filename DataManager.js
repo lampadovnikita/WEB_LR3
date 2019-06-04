@@ -66,12 +66,12 @@ module.exports = {
   },
 
   // Записываем ссылку на для указанного ID файла
-  writeFileLink: function (hashes, link) {
+  writeFileLink: function (hashes, link, address, port) {
     verifyDir(DATA_PATH);
     verifyDir(FILE_LINKS_PATH);
 
     fs.writeFileSync(FILE_LINKS_PATH + '/' + hashes[0] + '.txt',
-      link + '\r\n' + hashes[1] + '\r\n' + hashes[2] + '\r\n' + hashes[3]);
+      link + ' ' + address + ' ' + port + '\r\n' + hashes[1] + '\r\n' + hashes[2] + '\r\n' + hashes[3]);
   },
 
   writeFileInfo: function (fileName, hashes) {

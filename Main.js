@@ -98,7 +98,7 @@ dgramSocket.on('message', function (message, rinfo) {
       hashes.push(messageData['LastNameID']);
 
       // Записываем ссылку на файл
-      dataManager.writeFileLink(hashes, messageData['SenderID']);
+      dataManager.writeFileLink(hashes, messageData['SenderID'], messageData['SenderAddress'], messageData['SenderPort']);
 
       console.log('Link saved');
       console.log('-------------------------------------------------------------');
