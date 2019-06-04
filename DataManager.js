@@ -139,7 +139,7 @@ module.exports = {
     let fileInfo = {
       FileHash: undefined,
       FileName: undefined,
-      FileSize: undefined,
+      FileSize: undefined
     };
 
     let storedFilesInfo = fs.readdirSync(FILE_STORAGE_INFO_PATH);
@@ -166,18 +166,32 @@ module.exports = {
     verifyDir(DATA_PATH);
     verifyDir(FILE_LINKS_PATH);
 
+    let handlerInfo = {
+      ID: undefined,
+      Address: undefined,
+      Port: undefined
+    };
+
     let storedFilesLinks = fs.readdirSync(FILE_LINKS_PATH);
     for (let i = 0; i < storedFilesLinks.length; i++) {
-      let fileHashes = fs.readFileSync(FILE_LINKS_PATH + '/' + storedFilesLinks[i]);
-      fileHashes = fileHashes.toString();
-      fileHashes = fileHashes.split('\r\n');
+      let fileData = fs.readFileSync(FILE_LINKS_PATH + '/' + storedFilesLinks[i]);
+      fileData = fileData.toString();
+      fileData = fileData.split('\r\n');
 
-      let handlerID = fileHashes.shift();
+      let handlerData = fileData.shift();
+      handlerData = handlerData.split(' ');
+
+      let fileHashes = fileData;
       fileHashes.push(storedFilesLinks[i].replace(/[.]txt/, ''));
 
       for (let j = 0; j < fileHashes.length; j++) {
         if (fileHashes[j] === hash) {
-          return handlerID;
+
+          handlerInfo['ID'] = handlerData[0];
+          handlerInfo['Address'] = handlerData[1];
+          handlerInfo['Port'] = handlerData[2];
+
+          return handlerInfo;
         }
       }
     }
