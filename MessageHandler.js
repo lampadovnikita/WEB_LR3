@@ -7,14 +7,17 @@ const MSG_USER_NAME_LENGTH_SIZE = 2; // Количество байт под и�
 const MSG_USER_ID_SIZE = 16;         // Количество байт под ID пользователя
 const MSG_FILE_ID_SIZE = 16;         // Количество байт под ID файла
 
-const MSG_REQUEST_ONLINE_CODE = 0;        // Код запроса об активности соседей
-const MSG_RESPONSE_ONLINE_CODE = 1;       // Код ответа для запроса об активности
-const MSG_REQUEST_FILE_INFO_CODE = 2;          // Код запраса информации по хешу
+const MSG_REQUEST_ONLINE_CODE = 0;             // Код запроса об активности соседей
+const MSG_RESPONSE_ONLINE_CODE = 1;            // Код ответа для запроса об активности
+const MSG_REQUEST_FILE_INFO_CODE = 2;          // Код запроса информации по хешу
+const MSG_RESPONSE_FILE_LINK_CODE = 3;         // Код ответа с передачей информации о хранителе файла
+const MSG_RESPONSE_FILE_INFO_CODE = 7;         // Код ответа с передачей информации о файле
 const MSG_REQUEST_FILE_LINK_HOLDING_CODE = 8;  // Код запроса на хранение ссылки на файл
 const MSG_RESPONSE_FILE_LINK_HOLDING_CODE = 9; // Код подтверждеия об успешном хранении файла
 module.exports = {
   MSG_REQUEST_ONLINE_CODE: MSG_REQUEST_ONLINE_CODE,
   MSG_RESPONSE_ONLINE_CODE: MSG_RESPONSE_ONLINE_CODE,
+  MSG_RESPONSE_FILE_LINK_CODE: MSG_RESPONSE_FILE_LINK_CODE,
   MSG_REQUEST_FILE_LINK_HOLDING_CODE: MSG_REQUEST_FILE_LINK_HOLDING_CODE,
   MSG_RESPONSE_FILE_LINK_HOLDING_CODE: MSG_RESPONSE_FILE_LINK_HOLDING_CODE,
   MSG_REQUEST_FILE_INFO_CODE: MSG_REQUEST_FILE_INFO_CODE,
@@ -131,6 +134,28 @@ module.exports = {
     return message;
   },
 
+  buildResponseFileLink: function(responserID, fileID, holderID) {
+
+    //[3, IDanswerer, IDdata, IDholder, IPholder, PORTholder]
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+
+    // Указываем тип сообщения
+    message[0] = MSG_RESPONSE_FILE_LINK_HOLDING_CODE;
+
+    // Получаем буфер из строки с хешем и записываем в сообщение
+    responserID = hashManager.strToNumber(responserID);
+    message.fill(responserID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+
+    fileID = hashManager.strToNumber(fileID);
+    message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+
+    holderID = hashManager.strToNumber(holderID);
+    message.fill(destinationID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+
+    return message;
+    },
+
   // Функция обработки произвольного сообщения
   processMessage: function (message) {
     // Структура со всей возможной информацией из сообщения
@@ -143,6 +168,7 @@ module.exports = {
       FirstNameID: undefined,
       LastNameID: undefined,
       DestinationID: undefined,
+      HolderID: undefined,
       InfoHash: undefined
     };
 
@@ -207,6 +233,13 @@ module.exports = {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
       messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+    }
+    else if (messageData['Type'] === MSG_RESPONSE_FILE_LINK_CODE) {
+      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+      messageData['HolderID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE);
+
     }
 
     return messageData;

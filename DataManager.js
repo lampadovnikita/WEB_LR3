@@ -102,7 +102,6 @@ module.exports = {
       InfoType: undefined,
       FileHash: undefined,
       FileName: undefined,
-      FilePath: undefined
     };
 
     let searchStr = fs.readFileSync(SEARCH_INFO_PATH);
@@ -122,14 +121,6 @@ module.exports = {
       if (searchStr.length > 2) {
         searchInfo['FileName'] += ' ' + searchStr[2];
       }
-    }
-    else if (searchInfo['InfoType'] === 'Content') {
-      searchInfo['FilePath'] = FILE_STORAGE_PATH;
-      searchInfo['FilePath'] += '/' + searchStr[1];
-      if (searchStr.length > 2) {
-        searchInfo['FilePath'] += ' ' + searchStr[2];
-      }
-      searchInfo['FilePath'] += '.txt';
     }
     else {
       searchInfo = undefined;

@@ -50,7 +50,7 @@ module.exports = {
     let fileData = fs.readFileSync(path);
 
     let hash = crypto.createHash('md5').update(fileData).digest("hex");
-    return hash
+    return hash;
   },
 
   // Получаем хеш файла по его полному имени, если заданы оба аргумента
@@ -73,7 +73,6 @@ module.exports = {
     let hash = crypto.createHash('md5').update(strToHash).digest("hex");
     return hash;
   },
-
 
   // Получаем расстояние между двумя хешпми в виде числового буфера
   getDistance: function (firstHash, secondHash) {

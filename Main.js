@@ -10,7 +10,7 @@ const PORT = 41234;
 const BROADCAST_ADDRESS = netInterfaceHandler.getBroadcastAddress();
 
 const CONNECTION_TIME = 3000; // Время подключения(первого сбора информации), мс
-const CHECK_INTERVAL = 15000; // Интервал повторений опроса, мс
+const CHECK_INTERVAL = 3000; // Интервал повторений опроса, мс
 
 // Для считывания текста с консоли
 const rl = readline.createInterface({
@@ -140,19 +140,35 @@ dgramSocket.on('message', function (message, rinfo) {
     if (searchResult !== undefined) {
       console.log('File was found in storage');
       console.log('File ID: ' + searchResult);
+      console.log('Send response');
       console.log('-------------------------------------------------------------');
+
+      //let responseMessage = messageHandler.buildResponseFileInfo(currentUserID, messageData['InfoHash'], searchResult);
+      //dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
     }
-    else {
+    else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_INFO_CODE) {
       searchResult = dataManager.searchLink(messageData['InfoHash']);
       if (searchResult !== undefined) {
         console.log('File link was found in storage');
         console.log('Handler ID: ' + searchResult);
+        console.log('Send response');
         console.log('-------------------------------------------------------------');
+
+        let responseMessage = messageHandler.buildResponseFileLink(currentUserID, messageData['InfoHash'], searchResult);
+        dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       }
       else {
         console.log('Information wasn\'t found in storage');
         console.log('-------------------------------------------------------------');
       }
+    }
+    else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_CODE) {
+      console.log('-------------------------------------------------------------');
+      console.log('Get file holder info');
+      console.log('Sender ID: ' + messageData['SenderID']);
+      console.log('File ID: ' + messageData['InfoHash']);
+      console.log('File holder: ' + messageData['HolderID']);
+      console.log('-------------------------------------------------------------');
     }
   }
 });
@@ -276,9 +292,6 @@ function loopFunction() {
     }
     else if (searchInfo['InfoType'] === 'Name') {
       searchHash = hashManager.getFileNameHash(searchInfo['FileName']);
-    }
-    else if (searchInfo['InfoType'] === 'Content') {
-      searchHash = hashManager.getFileHash(searchInfo['FileName']);
     }
     else {
       return;
