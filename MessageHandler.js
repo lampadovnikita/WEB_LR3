@@ -196,8 +196,10 @@ module.exports = {
 
     message[0] = MSG_REQUEST_FILE_LOAD;
 
+    responserID = hashManager.strToNumber(responserID);
     message.fill(responserID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
+    fileID = hashManager.strToNumber(fileID);
     message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
     return message;
