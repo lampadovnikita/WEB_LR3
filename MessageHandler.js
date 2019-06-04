@@ -5,6 +5,7 @@ const hashManager = require('./HashManager');
 const MSG_TYPE_SIZE = 1;             // Количество байт под информацию о типе сообщения
 const MSG_USER_NAME_LENGTH_SIZE = 2; // Количество байт под информацию о длине имени пользователя
 const MSG_FILE_NAME_LENGTH_SIZE = 2; // Количество байт под информацию о длине имени файла
+const MSG_FILE_LENGTH_SIZE = 2;      // Количество байт под длину файла
 const MSG_USER_ID_SIZE = 16;         // Количество байт под ID пользователя
 const MSG_FILE_ID_SIZE = 16;         // Количество байт под ID файла
 
@@ -200,7 +201,8 @@ module.exports = {
       LastNameID: undefined,
       DestinationID: undefined,
       HolderID: undefined,
-      InfoHash: undefined
+      InfoHash: undefined,
+      FileSize: undefined
     };
 
     // Определяем тип
@@ -269,6 +271,32 @@ module.exports = {
     }
     // Если пришёл ответ на информацию о файле
     else if (messageData['Type'] === MSG_RESPONSE_FILE_INFO_CODE) {
+      /*// Распаковываем размер сообщения
+      userNameLength = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2];
+      userNameLength = userNameLength << 8;
+      userNameLength = userNameLength | message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 1];
+
+      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+
+      messageData['SenderName'] = message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE);*/
+
+      messageData['SenderID'] = message.toString("utf-8", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+
+      messageData['InfoHash'] = message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+
+      messageData['FileSize'] = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2];
+      messageData['FileSize'] = messageData['FileSize'] << 8;
+      messageData['FileSize'] = messageData['FileSize'] |
+        message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1];
+
+      let fileNameLength;
+      fileNameLength = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 2];
+      fileNameLength = fileNameLength << 8;
+      fileNameLength = fileNameLength |
+        message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1];
+
+      messageData['FileName'] = message(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE);
 
     }
     // Если пришёл ответ на информацию о файле в виде ID хранителя
