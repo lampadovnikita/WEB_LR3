@@ -105,7 +105,7 @@ dgramSocket.on('message', function (message, rinfo) {
 
       // Создаём сообщение для подтверждения сохранения
       let responseMessage = messageHandler.buildSaveFileLinkResponse(currentUserID, messageData['FileID'],
-        messageData['SenderID']);
+        messageData['SenderID'], ADDRESS, PORT);
 
       dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
     }
@@ -114,8 +114,10 @@ dgramSocket.on('message', function (message, rinfo) {
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_HOLDING_CODE) {
     console.log('-------------------------------------------------------------');
     console.log('Validate of saving file link');
-    console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['FileID']);
+    console.log('Sender ID: ' + messageData['SenderID']);
+    console.log('Sender IP: ' + messageData['SenderAddress']);
+    console.log('Sender port: ' + messageData['SenderPort']);
     console.log('-------------------------------------------------------------');
 
     // Сохраняем информацию о записанном файле
@@ -163,7 +165,8 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
-      let responseMessage = messageHandler.buildFileLinkResponse(currentUserID, messageData['InfoHash'], searchResult);
+      let responseMessage = messageHandler.buildFileLinkResponse(currentUserID, messageData['InfoHash'],
+        searchResult['ID'], );
       dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       return;
     }
