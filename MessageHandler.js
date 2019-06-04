@@ -137,7 +137,7 @@ module.exports = {
 
   // Формируем сообщение для подтверждения хранения ссылки на файл
   buildSaveFileLinkResponse: function (responserID, fileID, destinationID, address, port) {
-    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE);
 
     // Указываем тип сообщения
     message[0] = MSG_RESPONSE_FILE_LINK_HOLDING_CODE;
