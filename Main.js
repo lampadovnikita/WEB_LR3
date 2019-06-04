@@ -145,7 +145,7 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
-      let responseMessage = messageHandler.buildFileInfoResponse(currentUserID, searchResult,
+      let responseMessage = messageHandler.buildFileInfoResponse(currentUserID, searchResult['FileHash'],
         searchResult['FileSize'], searchResult['FileName']);
       dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       return;
@@ -168,7 +168,6 @@ dgramSocket.on('message', function (message, rinfo) {
     }
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_INFO_CODE) {
-
 
     console.log('-------------------------------------------------------------');
     console.log('Get file info');
