@@ -1,6 +1,7 @@
 // Всё, что касается обработки и формирования сообщений
 
 const hashManager = require('./HashManager');
+const netInterfaceHandler = require('./NetworkInterfaceHandler');
 
 const MSG_TYPE_SIZE = 1;             // Количество байт под информацию о типе сообщения
 const MSG_USER_NAME_LENGTH_SIZE = 2; // Количество байт под информацию о длине имени пользователя
@@ -8,6 +9,8 @@ const MSG_FILE_NAME_LENGTH_SIZE = 2; // Количество байт под и�
 const MSG_FILE_LENGTH_SIZE = 2;      // Количество байт под длину файла
 const MSG_USER_ID_SIZE = 16;         // Количество байт под ID пользователя
 const MSG_FILE_ID_SIZE = 16;         // Количество байт под ID файла
+const MSG_IPV4_SIZE = 4;
+const MSG_PORT_SIZE = 2;
 
 const MSG_REQUEST_ONLINE_CODE = 0;             // Код запроса об активности соседей
 const MSG_RESPONSE_ONLINE_CODE = 1;            // Код ответа для запроса об активности
@@ -17,6 +20,7 @@ const MSG_RESPONSE_FILE_INFO_CODE = 7;         // Код ответа с пер�
 const MSG_REQUEST_FILE_LINK_HOLDING_CODE = 8;  // Код запроса на хранение ссылки на файл
 const MSG_RESPONSE_FILE_LINK_HOLDING_CODE = 9; // Код подтверждеия об успешном хранении файла
 const MSG_REQUEST_FILE_LOAD = 10;              // Код запроса на загрузку файла
+const MSG_RESPONSE_FILE_LOAD = 11;             // Код ответа для загрузки файла
 
 module.exports = {
   MSG_REQUEST_ONLINE_CODE: MSG_REQUEST_ONLINE_CODE,
@@ -27,6 +31,7 @@ module.exports = {
   MSG_RESPONSE_FILE_LINK_HOLDING_CODE: MSG_RESPONSE_FILE_LINK_HOLDING_CODE,
   MSG_REQUEST_FILE_INFO_CODE: MSG_REQUEST_FILE_INFO_CODE,
   MSG_REQUEST_FILE_LOAD: MSG_REQUEST_FILE_LOAD,
+  MSG_RESPONSE_FILE_LOAD: MSG_RESPONSE_FILE_LOAD,
 
   // Формируем сообщение для проверки пользователей
   buildIsOnlineRequest: function (ID, name) {
@@ -96,8 +101,8 @@ module.exports = {
   },
 
   // Формируем сообщение для запроса на хранение ссылки на файл
-  buildSaveFileLinkRequest: function (requesterID, hashes, destinationID) {
-    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
+  buildSaveFileLinkRequest: function (requesterID, hashes, destinationID, address, port) {
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE);
 
     // Указываем тип сообщения
     message[0] = MSG_REQUEST_FILE_LINK_HOLDING_CODE;
@@ -115,6 +120,17 @@ module.exports = {
     destinationID = hashManager.strToNumber(destinationID);
     message.fill(destinationID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4,
       MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
+
+    address = netInterfaceHandler.ipToNum(address);
+
+    message.fill(address, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
+
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE +
+    MSG_PORT_SIZE - 1] = port;
+    port = port >> 8;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE +
+    MSG_PORT_SIZE - 2] = port;
 
     return message;
   },
@@ -174,13 +190,11 @@ module.exports = {
     fileID = hashManager.strToNumber(fileID);
     message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
-    // Упаковываем размер файла в 2 байта
     message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1] = infoLength;
     infoLength = infoLength >> 8;
     message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2] = infoLength;
 
     let fileNameLength = name.length;
-    // Упаковываем размер файла в 2 байта
     message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1] = fileNameLength;
     fileNameLength = fileNameLength >> 8;
     message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 2] = fileNameLength;
@@ -191,16 +205,39 @@ module.exports = {
     return message;
   },
 
-  buildFileLoadRequest: function (responserID, fileID) {
+  buildFileLoadRequest: function (requesterID,  fileID) {
     let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
     message[0] = MSG_REQUEST_FILE_LOAD;
+
+    requesterID = hashManager.strToNumber(requesterID);
+    message.fill(requesterID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+
+    fileID = hashManager.strToNumber(fileID);
+    message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+
+    return message;
+  },
+
+  buildFileLoadResponse: function (responserID, fileID, data) {
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + data.length);
+
+    message[0] = MSG_RESPONSE_FILE_LOAD;
 
     responserID = hashManager.strToNumber(responserID);
     message.fill(responserID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
     fileID = hashManager.strToNumber(fileID);
     message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+
+    let dataLength = data.length;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1] = dataLength;
+    dataLength = dataLength >> 8;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2] = dataLength;
+
+    message.fill(data, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + data.length);
 
     return message;
   },
@@ -219,7 +256,10 @@ module.exports = {
       DestinationID: undefined,
       HolderID: undefined,
       InfoHash: undefined,
-      FileSize: undefined
+      FileSize: undefined,
+      FileContent: undefined,
+      SenderAddress: undefined,
+      SenderPort: undefined
     };
 
     // Определяем тип
@@ -257,6 +297,15 @@ module.exports = {
 
       messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
+
+      //let address = Buffer.allocUnsafe(MSG_IPV4_SIZE);
+      let address = message.slice(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
+      address = netInterfaceHandler.ipToStr(address);
+      messageData['SenderAddress'] = address;
+
+      messageData['SenderPort'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE);
     }
     // Если пришло подтверждение хранения ссылки на файл
     else if (messageData['Type'] === MSG_RESPONSE_FILE_LINK_HOLDING_CODE) {
@@ -265,15 +314,6 @@ module.exports = {
 
       messageData['FileID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
-
-      /*messageData['FileNameID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 2);
-
-      messageData['FirstNameID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 2,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 3);
-
-      messageData['LastNameID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE * 3,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4);*/
 
       messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
@@ -320,10 +360,23 @@ module.exports = {
     }
     else if (messageData['Type'] === MSG_REQUEST_FILE_LOAD) {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+    }
+    else if (messageData['Type'] === MSG_RESPONSE_FILE_LOAD) {
+      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
       messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
-    }
 
+      messageData['FileSize'] = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2];
+      messageData['FileSize'] = messageData['FileSize'] << 8;
+      messageData['FileSize'] = messageData['FileSize'] |
+        message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1];
+
+      messageData['FileContent'] = message.toString("utf-8",
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE)
+    }
     return messageData;
   }
 };

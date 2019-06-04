@@ -185,6 +185,12 @@ module.exports = {
     return undefined;
   },
 
+  getFileContent: function (fileName) {
+    let content = fs.readFileSync(FILE_STORAGE_PATH + '/' + fileName);
+
+    return content;
+  },
+
   // Обновляем информацию о хранилище файлов
   refreshFileStorageData: function () {
     verifyDir(DATA_PATH);

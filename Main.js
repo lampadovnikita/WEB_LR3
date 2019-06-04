@@ -6,6 +6,7 @@ const dataManager = require('./DataManager');
 const messageHandler = require('./MessageHandler');
 const netInterfaceHandler = require('./NetworkInterfaceHandler');
 
+const ADDRESS = netInterfaceHandler.getInterfaceElement('address');
 const PORT = 41234;
 const BROADCAST_ADDRESS = netInterfaceHandler.getBroadcastAddress();
 
@@ -85,6 +86,8 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('-------------------------------------------------------------');
       console.log('Get request for saving file link');
       console.log('Sender ID: ' + messageData['SenderID']);
+      console.log('Sender IP: ' + messageData['SenderAddress']);
+      console.log('Sender port: ' + messageData['SenderPort']);
       console.log('Destination ID: ' + messageData['DestinationID']);
       console.log('File ID: ' + messageData['FileID']);
 
@@ -174,7 +177,7 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('File ID: ' + messageData['InfoHash']);
     console.log('File name: ' + messageData['FileName']);
     console.log('File size: ' + messageData['FileSize']);
-    console.log('Send loading request');
+    console.log('Send load request');
     console.log('-------------------------------------------------------------');
 
     let responseMessage = messageHandler.buildFileLoadRequest(currentUserID, messageData['InfoHash']);
@@ -191,6 +194,19 @@ dgramSocket.on('message', function (message, rinfo) {
   else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_LOAD) {
     console.log('-------------------------------------------------------------');
     console.log('Get request for load file');
+    console.log('Sender ID: ' + messageData['SenderID']);
+    console.log('File ID: ' + messageData['InfoHash']);
+    console.log('-------------------------------------------------------------');
+
+    let fileInfo = dataManager.searchFile(messageData['InfoHash']);
+    let fileContent = dataManager.getFileContent(fileInfo['FileName']);
+    let responseMessage = messageHandler.buildFileLoadResponse(currentUserID, messageData['InfoHash'], fileContent);
+    dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
+
+  }
+  else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LOAD) {
+    console.log('-------------------------------------------------------------');
+    console.log('Load file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
     console.log('-------------------------------------------------------------');
@@ -295,7 +311,7 @@ function loopFunction() {
       if (minIndex !== -1) {
         // Формируем сообщение для запроса на хранение ссылки на файл
         let requestMessage = messageHandler.buildSaveFileLinkRequest(currentUserID, value,
-          prevOnlineUsers.users[minIndex]['ID']);
+          prevOnlineUsers.users[minIndex]['ID'], ADDRESS, PORT);
 
         dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
       }
