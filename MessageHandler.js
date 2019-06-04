@@ -328,7 +328,17 @@ module.exports = {
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
       messageData['DestinationID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE);
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+
+      let address = message.slice(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
+      address = netInterfaceHandler.ipToStr(address);
+      messageData['SenderAddress'] = address;
+
+      messageData['SenderPort'] = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE - 2];
+      messageData['SenderPort'] = messageData['SenderPort'] << 8;
+      messageData['SenderPort'] = messageData['SenderPort'] |
+        message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE - 1];
     }
     // Если пришёл запрос на информацию о файле
     else if (messageData['Type'] === MSG_REQUEST_FILE_INFO_CODE) {
