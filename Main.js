@@ -157,7 +157,9 @@ dgramSocket.on('message', function (message, rinfo) {
     searchResult = dataManager.searchLink(messageData['InfoHash']);
     if (searchResult !== undefined) {
       console.log('File link was found in storage');
-      console.log('Handler ID: ' + searchResult);
+      console.log('Handler ID: ' + searchResult['ID']);
+      console.log('Handler IP: ' + searchResult['Address']);
+      console.log('Handler port: ' + searchResult['Port']);
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
