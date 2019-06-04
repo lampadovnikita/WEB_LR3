@@ -236,9 +236,10 @@ module.exports = {
     }
     else if (messageData['Type'] === MSG_RESPONSE_FILE_LINK_CODE) {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
-      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
-      messageData['HolderID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE);
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+      messageData['HolderID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
 
     }
 
