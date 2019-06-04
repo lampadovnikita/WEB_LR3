@@ -172,18 +172,18 @@ module.exports = {
     message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
     // Упаковываем размер файла в 2 байта
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1] = infoLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1] = infoLength;
     infoLength = infoLength >> 8;
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2] = infoLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2] = infoLength;
 
     let fileNameLength = name.length;
     // Упаковываем размер файла в 2 байта
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE - 1] = fileNameLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1] = fileNameLength;
     fileNameLength = fileNameLength >> 8;
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2] = fileNameLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 2] = fileNameLength;
 
-    message.fill(name, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE,
-      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE + name.length);
+    message.fill(name, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE + name.length);
 
     return message;
   },
@@ -271,14 +271,6 @@ module.exports = {
     }
     // Если пришёл ответ на информацию о файле
     else if (messageData['Type'] === MSG_RESPONSE_FILE_INFO_CODE) {
-      /*// Распаковываем размер сообщения
-      userNameLength = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2];
-      userNameLength = userNameLength << 8;
-      userNameLength = userNameLength | message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 1];
-
-      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
-
-      messageData['SenderName'] = message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE);*/
 
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
@@ -296,7 +288,8 @@ module.exports = {
       fileNameLength = fileNameLength |
         message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1];
 
-      messageData['FileName'] = message(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE);
+      messageData['FileName'] = message.toString("utf-8",
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE);
 
     }
     // Если пришёл ответ на информацию о файле в виде ID хранителя
