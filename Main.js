@@ -168,14 +168,17 @@ dgramSocket.on('message', function (message, rinfo) {
     }
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_INFO_CODE) {
-
     console.log('-------------------------------------------------------------');
     console.log('Get file info');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
     console.log('File name: ' + messageData['FileName']);
     console.log('File size: ' + messageData['FileSize']);
+    console.log('Send loading request');
     console.log('-------------------------------------------------------------');
+
+    let responseMessage = messageHandler.buildFileLoadRequest(currentUserID, messageData['InfoHash']);
+    dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_CODE) {
     console.log('-------------------------------------------------------------');
@@ -183,6 +186,13 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
     console.log('File holder: ' + messageData['HolderID']);
+    console.log('-------------------------------------------------------------');
+  }
+  else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_LOAD) {
+    console.log('-------------------------------------------------------------');
+    console.log('Get file holder info');
+    console.log('Sender ID: ' + messageData['SenderID']);
+    console.log('File ID: ' + messageData['InfoHash']);
     console.log('-------------------------------------------------------------');
   }
 });
@@ -240,12 +250,6 @@ dgramSocket.bind(PORT, function () {
     console.log('Connecting...');
   }
 });
-
-function sendFileInfoRequest(infoHash) {
-  console.log("iiii");
-  let requestMessage = messageHandler.buildFileInfoRequest(currentUserID, infoHash);
-  dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
-}
 
 // Функция, которая выполняется каждые CHECK_INTERVAL мс
 function loopFunction() {

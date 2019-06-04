@@ -16,6 +16,8 @@ const MSG_RESPONSE_FILE_LINK_CODE = 3;         // Код ответа с пер�
 const MSG_RESPONSE_FILE_INFO_CODE = 7;         // Код ответа с передачей информации о файле
 const MSG_REQUEST_FILE_LINK_HOLDING_CODE = 8;  // Код запроса на хранение ссылки на файл
 const MSG_RESPONSE_FILE_LINK_HOLDING_CODE = 9; // Код подтверждеия об успешном хранении файла
+const MSG_REQUEST_FILE_LOAD = 10;              // Код запроса на загрузку файла
+
 module.exports = {
   MSG_REQUEST_ONLINE_CODE: MSG_REQUEST_ONLINE_CODE,
   MSG_RESPONSE_ONLINE_CODE: MSG_RESPONSE_ONLINE_CODE,
@@ -24,6 +26,7 @@ module.exports = {
   MSG_REQUEST_FILE_LINK_HOLDING_CODE: MSG_REQUEST_FILE_LINK_HOLDING_CODE,
   MSG_RESPONSE_FILE_LINK_HOLDING_CODE: MSG_RESPONSE_FILE_LINK_HOLDING_CODE,
   MSG_REQUEST_FILE_INFO_CODE: MSG_REQUEST_FILE_INFO_CODE,
+  MSG_REQUEST_FILE_LOAD: MSG_REQUEST_FILE_LOAD,
 
   // Формируем сообщение для проверки пользователей
   buildIsOnlineRequest: function (ID, name) {
@@ -158,7 +161,6 @@ module.exports = {
   },
 
   buildFileInfoResponse: function (responserID, fileID, infoLength, name) {
-    //[7, IDanswerer, IDdata, info_lengthUINT16, name_lengthUINT16, name]
     let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE + name.length);
     //let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE + name.length);
 
@@ -185,6 +187,18 @@ module.exports = {
 
     message.fill(name, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE,
       MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE + name.length);
+
+    return message;
+  },
+
+  buildFileLoadRequest: function (responserID, fileID) {
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+
+    message[0] = MSG_REQUEST_FILE_LOAD;
+
+    message.fill(responserID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+
+    message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
     return message;
   },
@@ -301,6 +315,11 @@ module.exports = {
       messageData['HolderID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
 
+    }
+    else if (messageData['Type'] === MSG_REQUEST_FILE_LOAD) {
+      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
     }
 
     return messageData;
