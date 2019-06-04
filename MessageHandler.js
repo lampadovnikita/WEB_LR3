@@ -172,18 +172,18 @@ module.exports = {
     message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
     // Упаковываем размер файла в 2 байта
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 1] = infoLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1] = infoLength;
     infoLength = infoLength >> 8;
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2] = infoLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2] = infoLength;
 
     let fileNameLength = name.length;
     // Упаковываем размер файла в 2 байта
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 1] = fileNameLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE - 1] = fileNameLength;
     fileNameLength = fileNameLength >> 8;
-    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE - 2] = fileNameLength;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE - 2] = fileNameLength;
 
-    message.fill(name, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE,
-      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE + name.length);
+    message.fill(name, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_NAME_LENGTH_SIZE + MSG_USER_NAME_LENGTH_SIZE + name.length);
 
     return message;
   },
@@ -280,9 +280,9 @@ module.exports = {
 
       messageData['SenderName'] = message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_NAME_LENGTH_SIZE);*/
 
-      messageData['SenderID'] = message.toString("utf-8", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
+      messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
-      messageData['InfoHash'] = message.toString("utf-8", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
       messageData['FileSize'] = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2];
