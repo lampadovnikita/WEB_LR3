@@ -140,8 +140,8 @@ dgramSocket.on('message', function (message, rinfo) {
     if (searchResult !== undefined) {
       console.log('File was found in storage');
       console.log('File ID: ' + searchResult['FileHash']);
-      console.log('File Name: ' + searchResult['FileName']);
-      console.log('File size in bytes: ' + searchResult['FileSize']);
+      console.log('File name: ' + searchResult['FileName']);
+      console.log('File size: ' + searchResult['FileSize']);
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
@@ -166,6 +166,15 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('Information wasn\'t found in storage');
       console.log('-------------------------------------------------------------');
     }
+  }
+  else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_INFO_CODE) {
+    console.log('-------------------------------------------------------------');
+    console.log('Get file info');
+    console.log('Sender ID: ' + messageData['SenderID']);
+    console.log('File ID: ' + messageData['InfoHash']);
+    console.log('File name: ' + messageData['FileName']);
+    console.log('File size: ' + messageData['FileSize']);
+    console.log('-------------------------------------------------------------');
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_CODE) {
     console.log('-------------------------------------------------------------');
