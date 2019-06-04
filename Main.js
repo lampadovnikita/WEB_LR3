@@ -84,7 +84,7 @@ dgramSocket.on('message', function (message, rinfo) {
     // Если запрос адресован нам
     if (currentUserID === messageData['DestinationID']) {
       console.log('-------------------------------------------------------------');
-      console.log('Get request for saving file link');
+      console.log('Request for saving file link');
       console.log('Sender ID: ' + messageData['SenderID']);
       console.log('Sender IP: ' + messageData['SenderAddress']);
       console.log('Sender port: ' + messageData['SenderPort']);
@@ -113,7 +113,7 @@ dgramSocket.on('message', function (message, rinfo) {
   // Если пришло подтверждение хранения ссылки на файл
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_HOLDING_CODE) {
     console.log('-------------------------------------------------------------');
-    console.log('Get validate of saving file link');
+    console.log('Validate of saving file link');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['FileID']);
     console.log('-------------------------------------------------------------');
@@ -134,7 +134,7 @@ dgramSocket.on('message', function (message, rinfo) {
       return;
     }
     console.log('-------------------------------------------------------------');
-    console.log('Get request for information about file');
+    console.log('Request for information about file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('Info: ' + messageData['InfoHash']);
     console.log('-------------------------------------------------------------');
