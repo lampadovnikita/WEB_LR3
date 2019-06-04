@@ -83,7 +83,7 @@ dgramSocket.on('message', function (message, rinfo) {
     // Если запрос адресован нам
     if (currentUserID === messageData['DestinationID']) {
       console.log('-------------------------------------------------------------');
-      console.log('Request for saving file link');
+      console.log('Get request for saving file link');
       console.log('Sender ID: ' + messageData['SenderID']);
       console.log('Destination ID: ' + messageData['DestinationID']);
       console.log('File ID: ' + messageData['FileID']);
@@ -110,7 +110,7 @@ dgramSocket.on('message', function (message, rinfo) {
   // Если пришло подтверждение хранения ссылки на файл
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_HOLDING_CODE) {
     console.log('-------------------------------------------------------------');
-    console.log('Validate of saving file link');
+    console.log('Get validate of saving file link');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['FileID']);
     console.log('-------------------------------------------------------------');
@@ -131,7 +131,7 @@ dgramSocket.on('message', function (message, rinfo) {
       return;
     }
     console.log('-------------------------------------------------------------');
-    console.log('Request for information about file');
+    console.log('Get request for information about file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('Info: ' + messageData['InfoHash']);
     console.log('-------------------------------------------------------------');
@@ -190,7 +190,7 @@ dgramSocket.on('message', function (message, rinfo) {
   }
   else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_LOAD) {
     console.log('-------------------------------------------------------------');
-    console.log('Get file holder info');
+    console.log('Get request for load file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
     console.log('-------------------------------------------------------------');
