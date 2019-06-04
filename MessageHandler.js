@@ -304,8 +304,10 @@ module.exports = {
       address = netInterfaceHandler.ipToStr(address);
       messageData['SenderAddress'] = address;
 
-      messageData['SenderPort'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE);
+      messageData['SenderPort'] = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE - 2];
+      messageData['SenderPort'] = messageData['SenderPort'] << 8;
+      messageData['SenderPort'] = messageData['SenderPort'] |
+        message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE * 4 + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE - 1];
     }
     // Если пришло подтверждение хранения ссылки на файл
     else if (messageData['Type'] === MSG_RESPONSE_FILE_LINK_HOLDING_CODE) {
