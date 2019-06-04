@@ -141,13 +141,13 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('File was found in storage');
       console.log('File ID: ' + searchResult['FileHash']);
       console.log('File Name: ' + searchResult['FileName']);
-      console.log('File size: ' + searchResult['FileSize']);
+      console.log('File size in bytes: ' + searchResult['FileSize']);
       console.log('Send response');
       console.log('-------------------------------------------------------------');
 
-      let responseMessage = messageHandler.buildFileInfoResponse(currentUserID, searchResult, )
-      let n;
-      //dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
+      let responseMessage = messageHandler.buildFileInfoResponse(currentUserID, searchResult,
+        searchResult['FileSize'], searchResult['FileName']);
+      dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       return;
     }
 

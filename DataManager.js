@@ -152,7 +152,7 @@ module.exports = {
         if (fileHashes[j] === hash) {
           fileInfo['FileHash'] = hash;
           fileInfo['FileName'] = storedFilesInfo[i];
-          fileInfo['FileSize'] = fs.statSync(storedFilesInfo[i]);
+          fileInfo['FileSize'] = fs.statSync(FILE_STORAGE_PATH + '/' + storedFilesInfo[i])['size'];
           return fileInfo;
         }
       }
