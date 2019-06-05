@@ -242,7 +242,7 @@ module.exports = {
     return message;
   },
 
-  buildFileLoadResponse: function (responserID, fileID, data) {
+  buildFileLoadResponse: function (responserID, fileID, dataLength,  data) {
     let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + data.length);
 
     message[0] = MSG_RESPONSE_FILE_LOAD;
@@ -253,7 +253,6 @@ module.exports = {
     fileID = hashManager.strToNumber(fileID);
     message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
 
-    let dataLength = data.length;
     message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1] = dataLength;
     dataLength = dataLength >> 8;
     message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 2] = dataLength;
@@ -416,7 +415,11 @@ module.exports = {
         message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE - 1];
 
       messageData['FileContent'] = message.toString("utf-8",
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE)
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + messageData['FileSize']);
+
+      messageData['FileName'] = message.toString("utf-8",
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + messageData['FileSize']);
     }
     return messageData;
   }
