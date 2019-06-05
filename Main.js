@@ -343,7 +343,7 @@ function loopFunction() {
     }
   }
 
-  if (searchInfo !== undefined && isFileFound === false) {
+  if (searchInfo !== undefined) {
     let searchHash;
 
     if (searchInfo['InfoType'] === 'Hash') {
@@ -356,8 +356,10 @@ function loopFunction() {
       return;
     }
 
-    let requestMessage = messageHandler.buildFileInfoRequest(currentUserID, searchHash);
-    dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
+    if (isFileFound === false) {
+      let requestMessage = messageHandler.buildFileInfoRequest(currentUserID, searchHash);
+      dgramSocket.send(requestMessage, 0, requestMessage.length, PORT, BROADCAST_ADDRESS);
+    }
   }
 
   // Проверяем online, отсылая всем запросы
