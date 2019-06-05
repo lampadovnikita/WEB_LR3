@@ -42,6 +42,8 @@ let searchInfo = undefined;
 // Флаг, показывающий, что пользователь подключен (информация об online пользователях собирается первый раз)
 let isConnected = false;
 
+let isFileFound = false;
+
 const dgramSocket = dgram.createSocket("udp4");
 
 // Когда сокет начал слушать
@@ -176,6 +178,7 @@ dgramSocket.on('message', function (message, rinfo) {
     }
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_INFO_CODE) {
+    isFileFound = true;
     console.log('-------------------------------------------------------------');
     console.log('Get file info');
     console.log('Sender ID: ' + messageData['SenderID']);
@@ -189,6 +192,7 @@ dgramSocket.on('message', function (message, rinfo) {
     dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LINK_CODE) {
+    isFileFound = true;
     console.log('-------------------------------------------------------------');
     console.log('Get file holder info');
     console.log('Sender ID: ' + messageData['SenderID']);
@@ -226,6 +230,11 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('File name: ' + messageData['FileName']);
     console.log('File content: ' + messageData['FileContent']);
     console.log('-------------------------------------------------------------');
+
+    dataManager.writeFile(messageData['FileName'], messageData['FileContent']);
+    let hashes = [];
+    hashes = hashManager.getFileHashes(dataManager.FILE_STORAGE_PATH + '/' + messageData['FileName']);
+    dataManager.writeFileInfo(messageData['FileName'], hashes);
   }
 });
 
@@ -334,7 +343,7 @@ function loopFunction() {
     }
   }
 
-  if (searchInfo !== undefined) {
+  if (searchInfo !== undefined && isFileFound === false) {
     let searchHash;
 
     if (searchInfo['InfoType'] === 'Hash') {
