@@ -7,7 +7,7 @@ const messageHandler = require('./MessageHandler');
 const netInterfaceHandler = require('./NetworkInterfaceHandler');
 
 const ADDRESS = netInterfaceHandler.getInterfaceElement('address');
-const PORT = 41234;
+const PORT = 41235;
 const BROADCAST_ADDRESS = netInterfaceHandler.getBroadcastAddress();
 
 const CONNECTION_TIME = 3000; // Время подключения(первого сбора информации), мс
@@ -166,7 +166,7 @@ dgramSocket.on('message', function (message, rinfo) {
       console.log('-------------------------------------------------------------');
 
       let responseMessage = messageHandler.buildFileLinkResponse(currentUserID, messageData['InfoHash'],
-        searchResult['ID'], );
+        searchResult['ID'], searchResult['Address'], searchResult['Port']);
       dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
       return;
     }
@@ -193,8 +193,13 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('Get file holder info');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
-    console.log('File holder: ' + messageData['HolderID']);
+    console.log('File holder ID: ' + messageData['HolderID']);
+    console.log('File holder IP: ' + messageData['SenderAddress']);
+    console.log('File holder port: ' + messageData['SenderPort']);
     console.log('-------------------------------------------------------------');
+
+    let requestMessage = messageHandler.buildFileLoadRequest(currentUserID, messageData['InfoHash']);
+    dgramSocket.send(requestMessage, 0, requestMessage.length, messageData['SenderPort'], messageData['SenderIP']);
   }
   else if (messageData['Type'] === messageHandler.MSG_REQUEST_FILE_LOAD) {
     console.log('-------------------------------------------------------------');
