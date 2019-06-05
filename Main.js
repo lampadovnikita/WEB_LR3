@@ -7,7 +7,7 @@ const messageHandler = require('./MessageHandler');
 const netInterfaceHandler = require('./NetworkInterfaceHandler');
 
 const ADDRESS = netInterfaceHandler.getInterfaceElement('address');
-const PORT = 41235;
+const PORT = 41234;
 const BROADCAST_ADDRESS = netInterfaceHandler.getBroadcastAddress();
 
 const CONNECTION_TIME = 3000; // Время подключения(первого сбора информации), мс
@@ -196,6 +196,7 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('File holder ID: ' + messageData['HolderID']);
     console.log('File holder IP: ' + messageData['SenderAddress']);
     console.log('File holder port: ' + messageData['SenderPort']);
+    console.log('Send response');
     console.log('-------------------------------------------------------------');
 
     let requestMessage = messageHandler.buildFileLoadRequest(currentUserID, messageData['InfoHash']);
@@ -206,12 +207,15 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('Get request for load file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
+    console.log('Send response');
     console.log('-------------------------------------------------------------');
 
     let fileInfo = dataManager.searchFile(messageData['InfoHash']);
     let fileContent = dataManager.getFileContent(fileInfo['FileName']);
-    let responseMessage = messageHandler.buildFileLoadResponse(currentUserID, messageData['InfoHash'], fileContent);
-    dgramSocket.send(responseMessage, 0, responseMessage.length, PORT, rinfo.address);
+    let fileLength = fileContent.length;
+    fileContent += fileInfo['FileName'];
+    let responseMessage = messageHandler.buildFileLoadResponse(currentUserID, messageData['InfoHash'], fileLength, fileContent);
+    dgramSocket.send(responseMessage, 0, responseMessage.length, rinfo.port, rinfo.address);
 
   }
   else if (messageData['Type'] === messageHandler.MSG_RESPONSE_FILE_LOAD) {
@@ -219,6 +223,8 @@ dgramSocket.on('message', function (message, rinfo) {
     console.log('Load file');
     console.log('Sender ID: ' + messageData['SenderID']);
     console.log('File ID: ' + messageData['InfoHash']);
+    console.log('File name: ' + messageData['FileName']);
+    console.log('File content: ' + messageData['FileContent']);
     console.log('-------------------------------------------------------------');
   }
 });
