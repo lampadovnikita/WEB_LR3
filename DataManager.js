@@ -23,6 +23,7 @@ const FILE_STORAGE_INFO_PATH = './data/fileStorageInfo';
 const SEARCH_INFO_PATH = './data/searchInfo.txt';
 
 module.exports = {
+  FILE_STORAGE_PATH: FILE_STORAGE_PATH,
 
   // Считываем данные текущего пользователя из файла
   readUserInfo: function () {
@@ -72,6 +73,10 @@ module.exports = {
 
     fs.writeFileSync(FILE_LINKS_PATH + '/' + hashes[0] + '.txt',
       link + ' ' + address + ' ' + port + '\r\n' + hashes[1] + '\r\n' + hashes[2] + '\r\n' + hashes[3]);
+  },
+
+  writeFile: function (name, data) {
+    fs.appendFileSync(FILE_STORAGE_PATH + '/' + name, data);
   },
 
   writeFileInfo: function (fileName, hashes) {
