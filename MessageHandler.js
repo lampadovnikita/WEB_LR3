@@ -167,8 +167,8 @@ module.exports = {
     return message;
   },
 
-  buildFileLinkResponse: function (responserID, fileID, holderID) {
-    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+  buildFileLinkResponse: function (responserID, fileID, holderID, holderAddress, holderPort) {
+    let message = Buffer.allocUnsafe(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE);
 
     // Указываем тип сообщения
     message[0] = MSG_RESPONSE_FILE_LINK_CODE;
@@ -183,6 +183,17 @@ module.exports = {
     holderID = hashManager.strToNumber(holderID);
     message.fill(holderID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
       MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
+
+    holderAddress = netInterfaceHandler.ipToNum(holderAddress);
+
+    message.fill(holderAddress, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
+
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE +
+    MSG_PORT_SIZE - 1] = holderPort;
+    holderPort = holderPort >> 8;
+    message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE +
+    MSG_PORT_SIZE - 2] = holderPort;
 
     return message;
   },
@@ -225,8 +236,8 @@ module.exports = {
     message.fill(requesterID, MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
     fileID = hashManager.strToNumber(fileID);
-    message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE,
-      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+    message.fill(fileID, MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+      MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE);
 
     return message;
   },
@@ -369,7 +380,7 @@ module.exports = {
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_FILE_LENGTH_SIZE + MSG_FILE_NAME_LENGTH_SIZE);
 
     }
-    // Если пришёл ответ на информацию о файле в виде ID хранителя
+    // Если пришёл ответ на информацию о хранителе файла
     else if (messageData['Type'] === MSG_RESPONSE_FILE_LINK_CODE) {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
       messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
@@ -377,12 +388,22 @@ module.exports = {
       messageData['HolderID'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE,
         MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE);
 
+      let address = message.slice(MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE);
+      address = netInterfaceHandler.ipToStr(address);
+      messageData['SenderAddress'] = address;
+
+      messageData['SenderPort'] = message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE - 2];
+      messageData['SenderPort'] = messageData['SenderPort'] << 8;
+      messageData['SenderPort'] = messageData['SenderPort'] |
+        message[MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE + MSG_USER_ID_SIZE + MSG_IPV4_SIZE + MSG_PORT_SIZE - 1];
+
     }
     else if (messageData['Type'] === MSG_REQUEST_FILE_LOAD) {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
 
-      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE,
-        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
+      messageData['InfoHash'] = message.toString("hex", MSG_TYPE_SIZE + MSG_USER_ID_SIZE,
+        MSG_TYPE_SIZE + MSG_USER_ID_SIZE + MSG_FILE_ID_SIZE);
     }
     else if (messageData['Type'] === MSG_RESPONSE_FILE_LOAD) {
       messageData['SenderID'] = message.toString("hex", MSG_TYPE_SIZE, MSG_TYPE_SIZE + MSG_USER_ID_SIZE);
